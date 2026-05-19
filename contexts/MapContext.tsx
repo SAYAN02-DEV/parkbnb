@@ -1,5 +1,5 @@
 "use client"
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, ReactNode, useCallback, useMemo } from 'react';
 
 export type MarkerData = {
     id: string;
@@ -31,26 +31,36 @@ export const MapProvider = ({ children }: { children: ReactNode }) => {
     const [markers, setMarkers] = useState<MarkerData[]>([]);
     const [route, setRoute] = useState<RouteData | null>(null);
 
-    const addMarker = (marker: MarkerData) => {
+    const addMarker = useCallback((marker: MarkerData) => {
         setMarkers(prev => [...prev, marker]);
-    };
+    }, []);
 
-    const removeMarker = (id: string) => {
+    const removeMarker = useCallback((id: string) => {
         setMarkers(prev => prev.filter(m => m.id !== id));
-    };
+    }, []);
 
-    const updateMarker = (id: string, updates: Partial<MarkerData>) => {
+    const updateMarker = useCallback((id: string, updates: Partial<MarkerData>) => {
         setMarkers(prev => prev.map(m => 
             m.id === id ? { ...m, ...updates } : m
         ));
-    };
+    }, []);
 
-    const clearMarkers = () => {
+    const clearMarkers = useCallback(() => {
         setMarkers([]);
-    };
+    }, []);
+
+    const contextValue = useMemo(() => ({
+        markers,
+        route,
+        addMarker,
+        removeMarker,
+        updateMarker,
+        clearMarkers,
+        setRoute
+    }), [markers, route, addMarker, removeMarker, updateMarker, clearMarkers]);
 
     return (
-        <MapContext.Provider value={{ markers, route, addMarker, removeMarker, updateMarker, clearMarkers, setRoute }}>
+        <MapContext.Provider value={contextValue}>
             {children}
         </MapContext.Provider>
     );

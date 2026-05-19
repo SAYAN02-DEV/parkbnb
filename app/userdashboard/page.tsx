@@ -21,11 +21,19 @@ interface Booking {
   status: string;
 }
 
+type Coordinates = { latitude: number; longitude: number };
+
+type ParkingLocation = {
+  id: string;
+  latitude: number;
+  longitude: number;
+};
+
 const NearbyMap = ({
   userCoords,
   lots
 }: {
-  userCoords: { latitude: number; longitude: number };
+  userCoords: Coordinates;
   lots: ParkingLot[];
 }) => {
   const { addMarker, clearMarkers } = useMap();
@@ -57,17 +65,116 @@ const NearbyMap = ({
   return <Map latitude={userCoords.latitude} longitude={userCoords.longitude} />;
 };
 
+const CurrentBookingMap = ({
+  userCoords,
+  destination
+}: {
+  userCoords: Coordinates;
+  destination: Coordinates;
+}) => {
+  const { addMarker, clearMarkers, setRoute } = useMap();
+
+  useEffect(() => {
+    let isActive = true;
+
+    const token = process.env.NEXT_PUBLIC_MAPBOX_API_KEY;
+    clearMarkers();
+    setRoute(null);
+
+    addMarker({
+      id: 'current-user',
+      latitude: userCoords.latitude,
+      longitude: userCoords.longitude,
+      color: '#22c55e',
+      popup: 'Your location'
+    });
+
+    addMarker({
+      id: 'current-destination',
+      latitude: destination.latitude,
+      longitude: destination.longitude,
+      color: '#3b82f6',
+      popup: 'Booked station'
+    });
+
+    if (!token) {
+      return () => {
+        clearMarkers();
+        setRoute(null);
+      };
+    }
+
+    const fetchRoute = async () => {
+      const from = `${userCoords.longitude},${userCoords.latitude}`;
+      const to = `${destination.longitude},${destination.latitude}`;
+      const url = `https://api.mapbox.com/directions/v5/mapbox/driving/${from};${to}?geometries=geojson&overview=full&access_token=${token}`;
+
+      try {
+        const response = await fetch(url);
+        const data = await response.json();
+        if (!isActive || !data.routes?.length) return;
+
+        const route = data.routes[0];
+        setRoute({
+          coordinates: route.geometry.coordinates,
+          duration: route.duration,
+          distance: route.distance
+        });
+      } catch {
+        if (!isActive) return;
+        setRoute(null);
+      }
+    };
+
+    fetchRoute();
+
+    return () => {
+      isActive = false;
+      clearMarkers();
+      setRoute(null);
+    };
+  }, [userCoords, destination, addMarker, clearMarkers, setRoute]);
+
+  return <Map latitude={userCoords.latitude} longitude={userCoords.longitude} />;
+};
+
 const Page = () => {
   const [activeSection, setActiveSection] = useState('overview');
   const [showNearby, setShowNearby] = useState(false);
   const [nearbyLots, setNearbyLots] = useState<ParkingLot[]>([]);
   const [selectedLot, setSelectedLot] = useState<string | null>(null);
-  const [userCoords, setUserCoords] = useState<{ latitude: number; longitude: number } | null>(null);
+  const [userCoords, setUserCoords] = useState<Coordinates | null>(null);
+  const [currentLot, setCurrentLot] = useState<ParkingLocation | null>(null);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
   const [bookingLoading, setBookingLoading] = useState(false);
   const [bookings, setBookings] = useState<Booking[]>([]);
   const fetchedRef = useRef(false);
+
+  const fetchCurrentBookingDetails = useCallback(async (bookingId: string) => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) return;
+
+      const response = await axios.post(
+        '/api/v1/bookingdetails',
+        { bookingId },
+        { headers: { token } }
+      );
+
+      if (response.status === 200 && response.data?.parkingLot) {
+        setCurrentLot({
+          id: response.data.parkingLot.id,
+          latitude: response.data.parkingLot.latitude,
+          longitude: response.data.parkingLot.longitude
+        });
+      } else {
+        setCurrentLot(null);
+      }
+    } catch {
+      setCurrentLot(null);
+    }
+  }, []);
 
   const fetchBookings = useCallback(async (bookingType: 'current' | 'past') => {
     setLoading(true);
@@ -95,6 +202,7 @@ const Page = () => {
           const currentBookingId = response.data.currentBooking;
           
           if (currentBookingId) {
+            await fetchCurrentBookingDetails(currentBookingId);
             setBookings([{
               bookingId: currentBookingId,
               parkingId: 'Check details', // Mongoose model doesn't store this, so we provide a fallback
@@ -103,6 +211,7 @@ const Page = () => {
               status: 'Active'
             }]);
           } else {
+            setCurrentLot(null);
             setBookings([]);
           }
         } else if (bookingType === 'past') {
@@ -125,6 +234,30 @@ const Page = () => {
       setBookings([]);
     } finally {
       setLoading(false);
+    }
+  }, []);
+  useEffect(() => {
+    const latitude = localStorage.getItem('latitude');
+    const longitude = localStorage.getItem('longitude');
+
+    if (latitude && longitude) {
+      setUserCoords({
+        latitude: parseFloat(latitude),
+        longitude: parseFloat(longitude)
+      });
+      return;
+    }
+
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition((position) => {
+        const nextCoords = {
+          latitude: position.coords.latitude,
+          longitude: position.coords.longitude
+        };
+        localStorage.setItem('latitude', String(nextCoords.latitude));
+        localStorage.setItem('longitude', String(nextCoords.longitude));
+        setUserCoords(nextCoords);
+      });
     }
   }, []);
 
@@ -245,55 +378,86 @@ const Page = () => {
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(125,211,252,0.18),transparent_45%),radial-gradient(circle_at_bottom_right,rgba(34,197,94,0.16),transparent_45%)]" />
 
       {activeSection === 'currentbookings' ? (
-        <div className="relative max-w-7xl mx-auto px-6 py-12">
-          <button 
-            onClick={() => setActiveSection('overview')}
-            className="mb-8 px-4 py-2 bg-white text-black font-medium rounded-lg hover:bg-gray-200 transition-all"
-          >
-            ← Back
-          </button>
-          
-          <div className="max-w-4xl">
-            <h1 className="text-3xl font-semibold text-white mb-8 font-serif">Current Bookings</h1>
+        <MapProvider>
+          <div className="relative max-w-7xl mx-auto px-6 py-12">
+            <button 
+              onClick={() => setActiveSection('overview')}
+              className="mb-8 px-4 py-2 bg-white text-black font-medium rounded-lg hover:bg-gray-200 transition-all"
+            >
+              ← Back
+            </button>
             
-            <div className="bg-[#15181D] border border-[#232830] rounded-3xl p-8 shadow-[0_30px_80px_-60px_rgba(0,0,0,0.9)]">
-              {loading && bookings.length === 0 ? (
-                <p className="text-[#C4C7C5]">Loading bookings...</p>
-              ) : bookings.length === 0 ? (
-                <p className="text-[#C4C7C5]">No current bookings found</p>
-              ) : (
-                <div className="space-y-4">
-                  {bookings.map((booking) => (
-                    <div
-                      key={booking.bookingId}
-                      className="p-4 rounded-xl border bg-[#0F1115] border-[#232830] hover:border-[#A8C7FA] transition-all"
-                    >
-                      <div className="flex justify-between items-start">
-                        <div>
-                          <p className="font-medium text-white">{booking.bookingId}</p>
-                          <p className="text-sm text-[#8E918F]">Parking: {booking.parkingId}</p>
+            <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
+              <div className="lg:col-span-3">
+                <h1 className="text-3xl font-semibold text-white mb-8 font-serif">Current Bookings</h1>
+                
+                <div className="bg-[#15181D] border border-[#232830] rounded-3xl p-8 shadow-[0_30px_80px_-60px_rgba(0,0,0,0.9)]">
+                  {loading && bookings.length === 0 ? (
+                    <p className="text-[#C4C7C5]">Loading bookings...</p>
+                  ) : bookings.length === 0 ? (
+                    <p className="text-[#C4C7C5]">No current bookings found</p>
+                  ) : (
+                    <div className="space-y-4">
+                      {bookings.map((booking) => (
+                        <div
+                          key={booking.bookingId}
+                          className="p-4 rounded-xl border bg-[#0F1115] border-[#232830] hover:border-[#A8C7FA] transition-all"
+                        >
+                          <div className="flex justify-between items-start">
+                            <div>
+                              <p className="font-medium text-white">{booking.bookingId}</p>
+                              <p className="text-sm text-[#8E918F]">Parking: {booking.parkingId}</p>
+                            </div>
+                            <div className="px-3 py-1 rounded-full text-xs font-medium bg-green-900 text-green-200">
+                              {booking.status || 'Active'}
+                            </div>
+                          </div>
                         </div>
-                        <div className="px-3 py-1 rounded-full text-xs font-medium bg-green-900 text-green-200">
-                          {booking.status || 'Active'}
-                        </div>
-                      </div>
+                      ))}
                     </div>
-                  ))}
-                </div>
-              )}
+                  )}
 
-              {message && (
-                <div className={`mt-4 p-4 rounded-lg text-sm ${
-                  message.includes('Error') 
-                    ? 'bg-red-900 text-red-200' 
-                    : 'bg-green-900 text-green-200'
-                }`}>
-                  {message}
+                  {message && (
+                    <div className={`mt-4 p-4 rounded-lg text-sm ${
+                      message.includes('Error') 
+                        ? 'bg-red-900 text-red-200' 
+                        : 'bg-green-900 text-green-200'
+                    }`}>
+                      {message}
+                    </div>
+                  )}
                 </div>
-              )}
+              </div>
+
+              <div className="lg:col-span-2">
+                <div className="bg-[#15181D] border border-[#232830] rounded-3xl p-4 shadow-[0_30px_80px_-60px_rgba(0,0,0,0.9)]">
+                  <div className="flex items-center justify-between px-2 pb-4">
+                    <div>
+                      <p className="text-sm text-[#9AA2AE]">Route to booked station</p>
+                      <p className="text-lg font-medium text-white">Live directions</p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="h-2 w-2 rounded-full bg-[#34D399]" />
+                      <span className="text-xs text-[#9AA2AE]">Live</span>
+                    </div>
+                  </div>
+                  <div className="h-96 rounded-2xl overflow-hidden border border-[#1E232B]">
+                    {userCoords && currentLot ? (
+                      <CurrentBookingMap
+                        userCoords={userCoords}
+                        destination={{ latitude: currentLot.latitude, longitude: currentLot.longitude }}
+                      />
+                    ) : (
+                      <div className="flex h-full items-center justify-center text-sm text-[#9AA2AE]">
+                        {bookings.length === 0 ? 'No active booking yet' : 'Getting route...'}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
-        </div>
+        </MapProvider>
       ) : activeSection === 'pastbookings' ? (
         <div className="relative max-w-7xl mx-auto px-6 py-12">
           <button 
