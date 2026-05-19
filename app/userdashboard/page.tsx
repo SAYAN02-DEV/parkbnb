@@ -239,22 +239,24 @@ const Page = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#131314] text-white">
+    <div className="min-h-screen bg-[#0E0F12] text-white">
       <Navbar />
+      <div className="relative">
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(125,211,252,0.18),transparent_45%),radial-gradient(circle_at_bottom_right,rgba(34,197,94,0.16),transparent_45%)]" />
 
       {activeSection === 'currentbookings' ? (
-        <div className="max-w-7xl mx-auto px-6 py-10">
+        <div className="relative max-w-7xl mx-auto px-6 py-12">
           <button 
             onClick={() => setActiveSection('overview')}
-            className="mb-6 px-4 py-2 bg-white text-black font-medium rounded-lg hover:bg-gray-200 transition-all"
+            className="mb-8 px-4 py-2 bg-white text-black font-medium rounded-lg hover:bg-gray-200 transition-all"
           >
             ← Back
           </button>
           
           <div className="max-w-4xl">
-            <h1 className="text-3xl font-bold text-white mb-8">Current Bookings</h1>
+            <h1 className="text-3xl font-semibold text-white mb-8 font-serif">Current Bookings</h1>
             
-            <div className="bg-[#1E1F20] border border-[#333537] rounded-3xl p-8">
+            <div className="bg-[#15181D] border border-[#232830] rounded-3xl p-8 shadow-[0_30px_80px_-60px_rgba(0,0,0,0.9)]">
               {loading && bookings.length === 0 ? (
                 <p className="text-[#C4C7C5]">Loading bookings...</p>
               ) : bookings.length === 0 ? (
@@ -264,7 +266,7 @@ const Page = () => {
                   {bookings.map((booking) => (
                     <div
                       key={booking.bookingId}
-                      className="p-4 rounded-lg border bg-[#131314] border-[#333537] hover:border-[#A8C7FA] transition-all"
+                      className="p-4 rounded-xl border bg-[#0F1115] border-[#232830] hover:border-[#A8C7FA] transition-all"
                     >
                       <div className="flex justify-between items-start">
                         <div>
@@ -293,18 +295,18 @@ const Page = () => {
           </div>
         </div>
       ) : activeSection === 'pastbookings' ? (
-        <div className="max-w-7xl mx-auto px-6 py-10">
+        <div className="relative max-w-7xl mx-auto px-6 py-12">
           <button 
             onClick={() => setActiveSection('overview')}
-            className="mb-6 px-4 py-2 bg-white text-black font-medium rounded-lg hover:bg-gray-200 transition-all"
+            className="mb-8 px-4 py-2 bg-white text-black font-medium rounded-lg hover:bg-gray-200 transition-all"
           >
             ← Back
           </button>
           
           <div className="max-w-4xl">
-            <h1 className="text-3xl font-bold text-white mb-8">Past Bookings</h1>
+            <h1 className="text-3xl font-semibold text-white mb-8 font-serif">Past Bookings</h1>
             
-            <div className="bg-[#1E1F20] border border-[#333537] rounded-3xl p-8">
+            <div className="bg-[#15181D] border border-[#232830] rounded-3xl p-8 shadow-[0_30px_80px_-60px_rgba(0,0,0,0.9)]">
               {loading && bookings.length === 0 ? (
                 <p className="text-[#C4C7C5]">Loading bookings...</p>
               ) : bookings.length === 0 ? (
@@ -314,7 +316,7 @@ const Page = () => {
                   {bookings.map((booking) => (
                     <div
                       key={booking.bookingId}
-                      className="p-4 rounded-lg border bg-[#131314] border-[#333537] hover:border-[#A8C7FA] transition-all"
+                      className="p-4 rounded-xl border bg-[#0F1115] border-[#232830] hover:border-[#A8C7FA] transition-all"
                     >
                       <div className="flex justify-between items-start">
                         <div>
@@ -344,12 +346,13 @@ const Page = () => {
         </div>
       ) : activeSection === 'nearbyparking' ? (
         <MapProvider>
-          <div className="p-8">
+          <div className="relative p-8">
             <div className="max-w-6xl mx-auto">
               <div className="flex flex-col items-center justify-center gap-8 min-h-[500px]">
                 <div className="text-center">
-                  <h1 className="text-4xl font-bold text-white mb-4">User Dashboard</h1>
-                  <p className="text-slate-400 mb-8">Find and book nearby parking lots</p>
+                  <p className="uppercase tracking-[0.4em] text-xs text-[#7DD3FC] mb-4">Find Parking</p>
+                  <h1 className="text-4xl sm:text-5xl font-semibold text-white mb-4 font-serif">User Dashboard</h1>
+                  <p className="text-[#B7BDC6] mb-8">Find and book nearby parking lots</p>
                 </div>
 
                 <button
@@ -373,8 +376,8 @@ const Page = () => {
                 <div>
                   <div className="mb-8 flex items-center justify-between">
                     <div>
-                      <h1 className="text-3xl font-bold text-white mb-2">Nearby Parking Lots</h1>
-                      <p className="text-slate-400">Found {nearbyLots.length} parking lot(s) nearby</p>
+                      <h1 className="text-3xl font-semibold text-white mb-2 font-serif">Nearby Parking Lots</h1>
+                      <p className="text-[#B7BDC6]">Found {nearbyLots.length} parking lot(s) nearby</p>
                     </div>
                     <button
                       onClick={() => {
@@ -397,8 +400,8 @@ const Page = () => {
 
                 {nearbyLots.length > 0 ? (
                   <div className="grid grid-cols-1 gap-6">
-                    <div className="bg-slate-900 rounded-lg border border-slate-800 overflow-hidden">
-                      <div className="bg-slate-800 p-4 border-b border-slate-700 flex items-center justify-between">
+                    <div className="bg-[#15181D] rounded-2xl border border-[#232830] overflow-hidden">
+                      <div className="bg-[#0F1115] p-4 border-b border-[#232830] flex items-center justify-between">
                         <h2 className="text-lg font-semibold text-white">Map View</h2>
                         <span className="text-xs text-slate-400">Your location + nearby stations</span>
                       </div>
@@ -416,8 +419,8 @@ const Page = () => {
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     {/* Parking Lots List */}
                     <div className="lg:col-span-1">
-                      <div className="bg-slate-900 rounded-lg border border-slate-800 overflow-hidden">
-                        <div className="bg-slate-800 p-4 border-b border-slate-700">
+                      <div className="bg-[#15181D] rounded-2xl border border-[#232830] overflow-hidden">
+                        <div className="bg-[#0F1115] p-4 border-b border-[#232830]">
                           <h2 className="text-lg font-semibold text-white">Available Lots</h2>
                         </div>
                         <div className="divide-y divide-slate-700 max-h-96 overflow-y-auto">
@@ -461,21 +464,21 @@ const Page = () => {
                         (() => {
                           const selected = nearbyLots.find(lot => lot.id === selectedLot);
                           return selected ? (
-                            <div className="bg-slate-900 rounded-lg border border-slate-800 p-6">
-                              <h2 className="text-2xl font-bold text-white mb-6">Parking Lot Details</h2>
+                            <div className="bg-[#15181D] rounded-2xl border border-[#232830] p-6">
+                              <h2 className="text-2xl font-semibold text-white mb-6 font-serif">Parking Lot Details</h2>
                               
                               <div className="grid grid-cols-2 gap-6 mb-8">
-                                <div className="bg-slate-800 rounded-lg p-4">
+                                <div className="bg-[#0F1115] rounded-xl p-4 border border-[#232830]">
                                   <p className="text-slate-400 text-sm mb-2">Total Slots</p>
                                   <p className="text-3xl font-bold text-white">{selected.totalSlots}</p>
                                 </div>
-                                <div className="bg-slate-800 rounded-lg p-4">
+                                <div className="bg-[#0F1115] rounded-xl p-4 border border-[#232830]">
                                   <p className="text-slate-400 text-sm mb-2">Available Slots</p>
                                   <p className="text-3xl font-bold text-green-400">{selected.totalSlots - selected.bookedSlots}</p>
                                 </div>
                               </div>
 
-                              <div className="bg-slate-800 rounded-lg p-4 mb-6">
+                              <div className="bg-[#0F1115] rounded-xl p-4 mb-6 border border-[#232830]">
                                 <h3 className="text-white font-semibold mb-4">Location Coordinates</h3>
                                 <div className="grid grid-cols-2 gap-4">
                                   <div>
@@ -492,7 +495,7 @@ const Page = () => {
                               <button
                                 onClick={handleBookNow}
                                 disabled={selected.totalSlots - selected.bookedSlots === 0 || bookingLoading}
-                                className="w-full px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                                className="w-full px-6 py-3 bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
                               >
                                 {bookingLoading
                                   ? 'Booking...'
@@ -504,7 +507,7 @@ const Page = () => {
                           ) : null;
                         })()
                       ) : (
-                        <div className="bg-slate-900 rounded-lg border border-slate-800 p-8 flex items-center justify-center min-h-96">
+                        <div className="bg-[#15181D] rounded-2xl border border-[#232830] p-8 flex items-center justify-center min-h-96">
                           <p className="text-slate-400 text-center">Select a parking lot to see details and book</p>
                         </div>
                       )}
@@ -512,7 +515,7 @@ const Page = () => {
                   </div>
                   </div>
                 ) : (
-                  <div className="bg-slate-900 rounded-lg border border-slate-800 p-12 text-center">
+                  <div className="bg-[#15181D] rounded-2xl border border-[#232830] p-12 text-center">
                     <p className="text-slate-400 text-lg">No nearby parking lots found in your area</p>
                   </div>
                 )}
@@ -520,8 +523,9 @@ const Page = () => {
             ) : (
               <div className="flex flex-col items-center justify-center gap-8 min-h-[500px]">
                 <div className="text-center">
-                  <h1 className="text-4xl font-bold text-white mb-4">Find Parking</h1>
-                  <p className="text-slate-400 mb-8">Search for nearby parking lots</p>
+                  <p className="uppercase tracking-[0.4em] text-xs text-[#7DD3FC] mb-4">Find Parking</p>
+                  <h1 className="text-4xl sm:text-5xl font-semibold text-white mb-4 font-serif">Find Parking</h1>
+                  <p className="text-[#B7BDC6] mb-8">Search for nearby parking lots</p>
                 </div>
 
                 <button
@@ -546,11 +550,12 @@ const Page = () => {
           </div>
         </MapProvider>
       ) : (
-        <div className="max-w-7xl mx-auto px-6 py-10">
+        <div className="relative max-w-7xl mx-auto px-6 py-12">
           {/* Header */}
           <div className="mb-12">
-            <h1 className="text-4xl font-bold text-white mb-2">User Dashboard</h1>
-            <p className="text-[#C4C7C5]">Manage your parking bookings</p>
+            <p className="uppercase tracking-[0.4em] text-xs text-[#7DD3FC] mb-4">Overview</p>
+            <h1 className="text-4xl sm:text-5xl font-semibold text-white mb-3 font-serif">User Dashboard</h1>
+            <p className="text-[#B7BDC6] text-lg">Manage your parking bookings</p>
           </div>
 
           {/* Main Overview Grid */}
@@ -558,11 +563,11 @@ const Page = () => {
             
             {/* Current Bookings Card */}
             <div 
-              className="bg-[#1E1F20] border border-[#333537] rounded-3xl p-8 hover:border-[#A8C7FA] transition-all cursor-pointer" 
+              className="bg-[#15181D] border border-[#232830] rounded-3xl p-8 hover:border-[#A8C7FA] transition-all cursor-pointer shadow-[0_20px_60px_-50px_rgba(0,0,0,0.85)]" 
               onClick={() => setActiveSection('currentbookings')}
             >
-              <h3 className="text-2xl font-bold mb-2">Current Bookings</h3>
-              <p className="text-[#C4C7C5] mb-6">View your active parking bookings</p>
+              <h3 className="text-2xl font-semibold mb-2">Current Bookings</h3>
+              <p className="text-[#B7BDC6] mb-6">View your active parking bookings</p>
               <button className="w-full py-2.5 px-4 bg-white text-black font-medium rounded-2xl hover:bg-gray-100 transition-all">
                 View Now
               </button>
@@ -570,11 +575,11 @@ const Page = () => {
 
             {/* Past Bookings Card */}
             <div 
-              className="bg-[#1E1F20] border border-[#333537] rounded-3xl p-8 hover:border-[#A8C7FA] transition-all cursor-pointer" 
+              className="bg-[#15181D] border border-[#232830] rounded-3xl p-8 hover:border-[#A8C7FA] transition-all cursor-pointer shadow-[0_20px_60px_-50px_rgba(0,0,0,0.85)]" 
               onClick={() => setActiveSection('pastbookings')}
             >
-              <h3 className="text-2xl font-bold mb-2">Past Bookings</h3>
-              <p className="text-[#C4C7C5] mb-6">View your completed parking bookings</p>
+              <h3 className="text-2xl font-semibold mb-2">Past Bookings</h3>
+              <p className="text-[#B7BDC6] mb-6">View your completed parking bookings</p>
               <button className="w-full py-2.5 px-4 bg-white text-black font-medium rounded-2xl hover:bg-gray-100 transition-all">
                 View History
               </button>
@@ -582,11 +587,11 @@ const Page = () => {
 
             {/* Find Parking Card */}
             <div 
-              className="bg-[#1E1F20] border border-[#333537] rounded-3xl p-8 hover:border-[#A8C7FA] transition-all cursor-pointer" 
+              className="bg-[#15181D] border border-[#232830] rounded-3xl p-8 hover:border-[#A8C7FA] transition-all cursor-pointer shadow-[0_20px_60px_-50px_rgba(0,0,0,0.85)]" 
               onClick={() => setActiveSection('nearbyparking')}
             >
-              <h3 className="text-2xl font-bold mb-2">Find Parking</h3>
-              <p className="text-[#C4C7C5] mb-6">Find and book nearby parking lots</p>
+              <h3 className="text-2xl font-semibold mb-2">Find Parking</h3>
+              <p className="text-[#B7BDC6] mb-6">Find and book nearby parking lots</p>
               <button className="w-full py-2.5 px-4 bg-white text-black font-medium rounded-2xl hover:bg-gray-100 transition-all">
                 Search Now
               </button>
@@ -594,6 +599,7 @@ const Page = () => {
           </div>
         </div>
       )}
+      </div>
     </div>
   );
 };

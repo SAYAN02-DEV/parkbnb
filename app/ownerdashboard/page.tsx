@@ -157,15 +157,17 @@ const OwnerDashboard = () => {
   }, [activeSection, fetchDashboardStats]);
   
   return (
-    <div className="min-h-screen bg-[#131314] text-white">
+    <div className="min-h-screen bg-[#0E0F12] text-white">
       <Navbar />
+      <div className="relative">
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(125,211,252,0.18),transparent_45%),radial-gradient(circle_at_bottom_right,rgba(34,197,94,0.16),transparent_45%)]" />
 
       {activeSection === 'addstation' ? (
         <MapProvider>
-          <div className="max-w-7xl mx-auto px-6 py-10">
+          <div className="relative max-w-7xl mx-auto px-6 py-12">
             <button 
               onClick={() => setActiveSection('overview')}
-              className="mb-6 px-4 py-2 bg-white text-black font-medium rounded-lg hover:bg-gray-200 transition-all"
+              className="mb-8 px-4 py-2 bg-white text-black font-medium rounded-lg hover:bg-gray-200 transition-all"
             >
               ← Back
             </button>
@@ -173,18 +175,18 @@ const OwnerDashboard = () => {
           </div>
         </MapProvider>
       ) : activeSection === 'userleave' ? (
-        <div className="max-w-7xl mx-auto px-6 py-10">
+        <div className="relative max-w-7xl mx-auto px-6 py-12">
           <button 
             onClick={() => setActiveSection('overview')}
-            className="mb-6 px-4 py-2 bg-white text-black font-medium rounded-lg hover:bg-gray-200 transition-all"
+            className="mb-8 px-4 py-2 bg-white text-black font-medium rounded-lg hover:bg-gray-200 transition-all"
           >
             ← Back
           </button>
           
           <div className="max-w-2xl">
-            <h1 className="text-3xl font-bold text-white mb-8">Process Customer Departure</h1>
+            <h1 className="text-3xl font-semibold text-white mb-8 font-serif">Process Customer Departure</h1>
             
-            <div className="bg-[#1E1F20] border border-[#333537] rounded-3xl p-8">
+            <div className="bg-[#15181D] border border-[#232830] rounded-3xl p-8 shadow-[0_30px_80px_-60px_rgba(0,0,0,0.9)]">
               <div className="mb-6">
                 <label className="block text-white text-sm font-medium mb-3">
                   Select Booking ID
@@ -200,10 +202,10 @@ const OwnerDashboard = () => {
                       <div
                         key={booking.id || booking.bookingId || `${booking.userId}-${booking.date}-${index}`}
                         onClick={() => setSelectedBookingId(booking.id)}
-                        className={`p-4 rounded-lg cursor-pointer transition-all border ${
+                        className={`p-4 rounded-xl cursor-pointer transition-all border ${
                           selectedBookingId === booking.id
                             ? 'bg-blue-600 border-blue-500'
-                            : 'bg-[#131314] border-[#333537] hover:border-[#A8C7FA]'
+                            : 'bg-[#0F1115] border-[#232830] hover:border-[#A8C7FA]'
                         }`}
                       >
                         <div className="flex justify-between items-center">
@@ -228,7 +230,7 @@ const OwnerDashboard = () => {
               <button
                 onClick={handleProcessLeave}
                 disabled={loading || !selectedBookingId}
-                className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-slate-700 text-white font-medium py-3 rounded-lg transition"
+                className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-slate-700 text-white font-medium py-3 rounded-xl transition"
               >
                 {loading ? 'Processing...' : 'Process Departure'}
               </button>
@@ -247,48 +249,58 @@ const OwnerDashboard = () => {
         </div>
       ) : (
         <>
-        <div className="max-w-7xl mx-auto px-6 py-10">
+        <div className="relative max-w-7xl mx-auto px-6 py-12">
         {/* Header */}
         <div className="mb-12">
-          <h1 className="text-4xl font-bold text-white mb-2">Owner Dashboard</h1>
-          <p className="text-[#C4C7C5]">Manage your parking stations and monitor activity</p>
+          <p className="uppercase tracking-[0.4em] text-xs text-[#7DD3FC] mb-4">Operations</p>
+          <h1 className="text-4xl sm:text-5xl font-semibold text-white mb-3 font-serif">Owner Dashboard</h1>
+          <p className="text-[#B7BDC6] text-lg">Manage your parking stations and monitor activity</p>
         </div>
 
         {/* Main Overview Grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
           
           {/* Add Station Card */}
-          <div className="bg-[#1E1F20] border border-[#333537] rounded-3xl p-8 hover:border-[#A8C7FA] transition-all cursor-pointer" onClick={() => setActiveSection('addstation')}>
-            <div className="flex ]items-center justify-between mb-4">
-              
+          <div className="bg-[#15181D] border border-[#232830] rounded-3xl p-8 hover:border-[#A8C7FA] transition-all cursor-pointer shadow-[0_20px_60px_-50px_rgba(0,0,0,0.85)]" onClick={() => setActiveSection('addstation')}>
+            <div className="flex items-center justify-between mb-4">
+              <div className="h-10 w-10 rounded-xl bg-[#0F1115] border border-[#232830] flex items-center justify-center text-[#7DD3FC]">
+                +
+              </div>
+              <span className="text-xs text-[#9AA2AE]">Create</span>
             </div>
-            <h3 className="text-2xl font-bold mb-2">Add Station</h3>
-            <p className="text-[#C4C7C5]">Register a new parking station</p>
-            <button className="mt-6 w-full py-2.5 px-4 bg-white text-black font-medium rounded-2xl hover:bg-white-400 transition-all">
+            <h3 className="text-2xl font-semibold mb-2">Add Station</h3>
+            <p className="text-[#B7BDC6]">Register a new parking station</p>
+            <button className="mt-6 w-full py-2.5 px-4 bg-white text-black font-medium rounded-2xl hover:bg-gray-100 transition-all">
               + Add Now
             </button>
           </div>
 
           {/* User Leave Card */}
-          <div className="bg-[#1E1F20] border border-[#333537] rounded-3xl p-8 hover:border-[#A8C7FA] transition-all cursor-pointer" onClick={() => setActiveSection('userleave')}>
+          <div className="bg-[#15181D] border border-[#232830] rounded-3xl p-8 hover:border-[#A8C7FA] transition-all cursor-pointer shadow-[0_20px_60px_-50px_rgba(0,0,0,0.85)]" onClick={() => setActiveSection('userleave')}>
             <div className="flex items-center justify-between mb-4">
-             
+              <div className="h-10 w-10 rounded-xl bg-[#0F1115] border border-[#232830] flex items-center justify-center text-[#FCA5A5]">
+                ↘
+              </div>
+              <span className="text-xs text-[#9AA2AE]">Departures</span>
             </div>
-            <h3 className="text-2xl font-bold mb-2">User Leave</h3>
-            <p className="text-[#C4C7C5]">Mark customer as departed</p>
-            <button className="mt-6 w-full py-2.5 px-4 bg-white text-black font-medium rounded-2xl hover:bg-white-400 transition-all">
+            <h3 className="text-2xl font-semibold mb-2">User Leave</h3>
+            <p className="text-[#B7BDC6]">Mark customer as departed</p>
+            <button className="mt-6 w-full py-2.5 px-4 bg-white text-black font-medium rounded-2xl hover:bg-gray-100 transition-all">
               Process Leave
             </button>
           </div>
 
           {/* Analytics Card */}
-          <div className="bg-[#1E1F20] border border-[#333537] rounded-3xl p-8 hover:border-[#A8C7FA] transition-all cursor-pointer" onClick={() => setActiveSection('analytics')}>
+          <div className="bg-[#15181D] border border-[#232830] rounded-3xl p-8 hover:border-[#A8C7FA] transition-all cursor-pointer shadow-[0_20px_60px_-50px_rgba(0,0,0,0.85)]" onClick={() => setActiveSection('analytics')}>
             <div className="flex items-center justify-between mb-4">
-            
+              <div className="h-10 w-10 rounded-xl bg-[#0F1115] border border-[#232830] flex items-center justify-center text-[#A7F3D0]">
+                ▸
+              </div>
+              <span className="text-xs text-[#9AA2AE]">Insights</span>
             </div>
-            <h3 className="text-2xl font-bold mb-2">Analytics</h3>
-            <p className="text-[#C4C7C5]">View parking statistics</p>
-            <button className="mt-6 w-full py-2.5 px-4 bg-white text-black font-medium rounded-2xl hover:bg-white-400 transition-all">
+            <h3 className="text-2xl font-semibold mb-2">Analytics</h3>
+            <p className="text-[#B7BDC6]">View parking statistics</p>
+            <button className="mt-6 w-full py-2.5 px-4 bg-white text-black font-medium rounded-2xl hover:bg-gray-100 transition-all">
               View Analytics
             </button>
           </div>
@@ -296,26 +308,26 @@ const OwnerDashboard = () => {
 
         {/* Quick Stats */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-12">
-          <div className="bg-[#1E1F20] border border-[#333537] rounded-2xl p-6">
+          <div className="bg-[#15181D] border border-[#232830] rounded-2xl p-6">
             <p className="text-[#8E918F] text-sm mb-2">Total Stations</p>
             <p className="text-3xl font-bold">{statsLoading ? '—' : stats.totalStations}</p>
           </div>
-          <div className="bg-[#1E1F20] border border-[#333537] rounded-2xl p-6">
+          <div className="bg-[#15181D] border border-[#232830] rounded-2xl p-6">
             <p className="text-[#8E918F] text-sm mb-2">Total Slots</p>
             <p className="text-3xl font-bold">{statsLoading ? '—' : stats.totalSlots}</p>
           </div>
-          <div className="bg-[#1E1F20] border border-[#333537] rounded-2xl p-6">
+          <div className="bg-[#15181D] border border-[#232830] rounded-2xl p-6">
             <p className="text-[#8E918F] text-sm mb-2">Occupied</p>
             <p className="text-3xl font-bold text-red-400">{statsLoading ? '—' : stats.occupied}</p>
           </div>
-          <div className="bg-[#1E1F20] border border-[#333537] rounded-2xl p-6">
+          <div className="bg-[#15181D] border border-[#232830] rounded-2xl p-6">
             <p className="text-[#8E918F] text-sm mb-2">Available</p>
             <p className="text-3xl font-bold text-green-400">{statsLoading ? '—' : stats.available}</p>
           </div>
         </div>
 
         {/* Recent Activity */}
-        <div className="bg-[#1E1F20] border border-[#333537] rounded-3xl p-8">
+        <div className="bg-[#15181D] border border-[#232830] rounded-3xl p-8">
           <h2 className="text-2xl font-bold mb-6">Recent Activity</h2>
           <div className="space-y-4">
             <div className="flex items-center justify-between p-4 bg-[#131314] rounded-2xl border border-[#333537]">
@@ -330,6 +342,7 @@ const OwnerDashboard = () => {
       </div>
       </>
       )}
+      </div>
     </div>
   );
 };
