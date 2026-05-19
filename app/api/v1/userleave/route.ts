@@ -29,12 +29,39 @@ export async function POST(req: NextRequest) {
     try{
         const body= await req.json();
         const bookingId = body.bookingId;
-        const booking = await Booking.findByIdAndUpdate(bookingId, { isOccupied: false });
-        const parkingLotId = booking?.parkingLotId;
-        const userId = booking?.userId;
 
-        const parkingLot = await ParkingLot.findOneAndUpdate({ parkingId: parkingLotId }, { $inc: { bookedSlots: -1 } });
-        const customer = await User.findOneAndUpdate({ userId: userId }, { $push: { pastBooking: { bookingId } }, $set: { currentBooking: null } });
+        if (!bookingId) {
+            return NextResponse.json(
+                {message:"bookingId is required"},
+                {status:400}
+            )
+        }
+
+        const booking = await Booking.findByIdAndUpdate(
+            bookingId,
+            { isOccupied: false },
+            { new: true }
+        );
+
+        if (!booking) {
+            return NextResponse.json(
+                {message:"booking not found"},
+                {status:404}
+            )
+        }
+
+        const parkingLotId = booking.parkingLotId;
+        const userEmail = booking.userId;
+
+        await ParkingLot.updateOne(
+            { _id: parkingLotId },
+            { $inc: { bookedSlots: -1 } }
+        );
+
+        await User.updateOne(
+            { email: userEmail },
+            { $push: { pastBooking: { bookingId: booking._id.toString() } }, $set: { currentBooking: null } }
+        );
         
         return NextResponse.json(
             {message:"customer left the parking lot successfully"},

@@ -74,6 +74,7 @@ export async function GET() {
                 bookingIds: bookingIds,
                 activeBookingIds: activeBookingIds,
                 allBookings: bookings.map(booking => ({
+                    id: booking._id,
                     bookingId: booking.bookingId,
                     userId: booking.userId,
                     isOccupied: booking.isOccupied,

@@ -6,7 +6,7 @@ import { MapProvider } from '@/contexts/MapContext';
 
 const OwnerDashboard = () => {
   const [activeSection, setActiveSection] = useState('overview');
-  const [bookings, setBookings] = useState<{ bookingId: string; userId: string; isOccupied: boolean; date: string }[]>([]);
+  const [bookings, setBookings] = useState<{ id: string; bookingId?: string; userId: string; isOccupied: boolean; date: string }[]>([]);
   const [selectedBookingId, setSelectedBookingId] = useState('');
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
@@ -196,19 +196,19 @@ const OwnerDashboard = () => {
                   <p className="text-[#C4C7C5]">No active bookings found</p>
                 ) : (
                   <div className="space-y-2 max-h-96 overflow-y-auto">
-                    {bookings.map((booking) => (
+                    {bookings.map((booking, index) => (
                       <div
-                        key={booking.bookingId}
-                        onClick={() => setSelectedBookingId(booking.bookingId)}
+                        key={booking.id || booking.bookingId || `${booking.userId}-${booking.date}-${index}`}
+                        onClick={() => setSelectedBookingId(booking.id)}
                         className={`p-4 rounded-lg cursor-pointer transition-all border ${
-                          selectedBookingId === booking.bookingId
+                          selectedBookingId === booking.id
                             ? 'bg-blue-600 border-blue-500'
                             : 'bg-[#131314] border-[#333537] hover:border-[#A8C7FA]'
                         }`}
                       >
                         <div className="flex justify-between items-center">
                           <div>
-                            <p className="font-medium text-white">Booking ID: {booking.bookingId}</p>
+                            <p className="font-medium text-white">Booking ID: {booking.bookingId || booking.id}</p>
                             <p className="text-sm text-[#8E918F]">User ID: {booking.userId}</p>
                           </div>
                           <div className={`px-3 py-1 rounded-full text-xs font-medium ${
