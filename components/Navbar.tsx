@@ -7,15 +7,26 @@ const Navbar = () => {
   const router = useRouter();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [email, setEmail] = useState('');
+  const [isOwner, setIsOwner] = useState(false);
 
   useEffect(() => {
     const token = localStorage.getItem('token');
     const userEmail = localStorage.getItem('email');
+    const ownerFlag = localStorage.getItem('isOwner');
     if (token) {
        setIsLoggedIn(true);
       setEmail(userEmail || '');
+      setIsOwner(ownerFlag === 'true');
     }
   }, []);
+
+  const handleDashboardRedirect = () => {
+    if (isOwner) {
+      router.push('/ownerdashboard');
+    } else {
+      router.push('/userdashboard');
+    }
+  };
 
   const handleLogout = () => {
     localStorage.removeItem('token');
@@ -52,7 +63,12 @@ const Navbar = () => {
         {/* Sign In / Logout Button */}
         {isLoggedIn ? (
           <div className="flex items-center gap-4">
-            <span className="text-[#C4C7C5] text-sm">{email}</span>
+            <button
+              onClick={handleDashboardRedirect}
+              className="text-[#C4C7C5] text-sm hover:text-white transition-colors"
+            >
+              {email}
+            </button>
             <button
               onClick={handleLogout}
               className="px-6 py-2.5 text-white font-medium border rounded-2xl transition-all hover:bg-white/20 flex items-center gap-2">

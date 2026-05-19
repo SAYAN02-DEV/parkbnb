@@ -28,8 +28,8 @@ export async function POST(req: NextRequest) {
         )
     }
     if(user.password===password){
-        const token = jwt.sign({ email }, JWT_SECRET!, { expiresIn: '7d' });
-        return NextResponse.json({ token: token}, { status: 200 });
+      const token = jwt.sign({ email }, JWT_SECRET!, { expiresIn: '7d' });
+      return NextResponse.json({ token: token, isOwner: true }, { status: 200 });
 
     }
     return NextResponse.json({ message: "Invalid credentials" }, { status: 401 });

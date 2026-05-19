@@ -1,7 +1,8 @@
 'use client';
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import Navbar from '@/components/Navbar';
-import { MapProvider } from '@/contexts/MapContext';
+import { MapProvider, useMap } from '@/contexts/MapContext';
+import Map from '@/components/Map';
 import axios from 'axios';
 
 interface ParkingLot {
@@ -20,11 +21,48 @@ interface Booking {
   status: string;
 }
 
+const NearbyMap = ({
+  userCoords,
+  lots
+}: {
+  userCoords: { latitude: number; longitude: number };
+  lots: ParkingLot[];
+}) => {
+  const { addMarker, clearMarkers } = useMap();
+
+  useEffect(() => {
+    clearMarkers();
+    addMarker({
+      id: 'user-location',
+      latitude: userCoords.latitude,
+      longitude: userCoords.longitude,
+      color: '#22c55e',
+      popup: 'You are here'
+    });
+
+    lots.forEach((lot) => {
+      const available = Math.max(0, lot.totalSlots - lot.bookedSlots);
+      addMarker({
+        id: `lot-${lot.id}`,
+        latitude: lot.latitude,
+        longitude: lot.longitude,
+        color: '#3b82f6',
+        popup: `Available: ${available}/${lot.totalSlots}`
+      });
+    });
+
+    return () => clearMarkers();
+  }, [userCoords, lots, addMarker, clearMarkers]);
+
+  return <Map latitude={userCoords.latitude} longitude={userCoords.longitude} />;
+};
+
 const Page = () => {
   const [activeSection, setActiveSection] = useState('overview');
   const [showNearby, setShowNearby] = useState(false);
   const [nearbyLots, setNearbyLots] = useState<ParkingLot[]>([]);
   const [selectedLot, setSelectedLot] = useState<string | null>(null);
+  const [userCoords, setUserCoords] = useState<{ latitude: number; longitude: number } | null>(null);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
   const [bookingLoading, setBookingLoading] = useState(false);
@@ -114,6 +152,11 @@ const Page = () => {
         setLoading(false);
         return;
       }
+
+      setUserCoords({
+        latitude: parseFloat(latitude),
+        longitude: parseFloat(longitude)
+      });
 
       if (!token) {
         setMessage('Not authenticated. Please sign in first.');
@@ -353,7 +396,24 @@ const Page = () => {
                 )}
 
                 {nearbyLots.length > 0 ? (
-                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                  <div className="grid grid-cols-1 gap-6">
+                    <div className="bg-slate-900 rounded-lg border border-slate-800 overflow-hidden">
+                      <div className="bg-slate-800 p-4 border-b border-slate-700 flex items-center justify-between">
+                        <h2 className="text-lg font-semibold text-white">Map View</h2>
+                        <span className="text-xs text-slate-400">Your location + nearby stations</span>
+                      </div>
+                      <div className="h-96">
+                        {userCoords ? (
+                          <NearbyMap userCoords={userCoords} lots={nearbyLots} />
+                        ) : (
+                          <div className="flex h-full items-center justify-center text-sm text-slate-400">
+                            Location not available
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     {/* Parking Lots List */}
                     <div className="lg:col-span-1">
                       <div className="bg-slate-900 rounded-lg border border-slate-800 overflow-hidden">
@@ -449,6 +509,7 @@ const Page = () => {
                         </div>
                       )}
                     </div>
+                  </div>
                   </div>
                 ) : (
                   <div className="bg-slate-900 rounded-lg border border-slate-800 p-12 text-center">

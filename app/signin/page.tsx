@@ -34,13 +34,14 @@ const Signin = () => {
       });
       
       if (response.status === 200 && response.data.token) {
+        const serverIsOwner = Boolean(response.data.isOwner);
         
         localStorage.setItem('token', response.data.token);
         localStorage.setItem('email', email);
-        localStorage.setItem('isOwner', isOwner.toString());
+        localStorage.setItem('isOwner', serverIsOwner.toString());
         
         console.log("signing succeed")
-       if(isOwner) router.push('/ownerdashboard');
+       if(serverIsOwner) router.push('/ownerdashboard');
        else router.push('/userdashboard');
       }
     } catch (err) {
