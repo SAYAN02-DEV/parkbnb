@@ -78,7 +78,7 @@ const OwnerDashboard = () => {
       if (response.ok) {
         setMessage('Success! Customer departure processed.');
         setSelectedBookingId('');
-        // Refresh bookings list
+        
         await fetchBookings();
       } else {
         setMessage(data.message || 'Failed to process leave');

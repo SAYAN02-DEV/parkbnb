@@ -51,21 +51,36 @@ const Page = () => {
         }
       );
 
-      if (response.status === 200 && response.data.bookings) {
-        const allBookings = response.data.bookings as Booking[];
-
+      if (response.status === 200) {
         if (bookingType === 'current') {
-          const currentBookings = allBookings.filter(
-            (booking) => booking.status === 'active' || booking.status === 'confirmed'
-          );
-          setBookings(currentBookings);
-        } else {
-          const pastBookings = allBookings.filter(
-            (booking) => booking.status !== 'active' && booking.status !== 'confirmed'
-          );
-          setBookings(pastBookings);
+          // currentBooking is a String in your Mongoose model
+          const currentBookingId = response.data.currentBooking;
+          
+          if (currentBookingId) {
+            setBookings([{
+              bookingId: currentBookingId,
+              parkingId: 'Check details', // Mongoose model doesn't store this, so we provide a fallback
+              userId: '',
+              bookingDate: '',
+              status: 'Active'
+            }]);
+          } else {
+            setBookings([]);
+          }
+        } else if (bookingType === 'past') {
+          // pastBooking is an Array of Objects in your Mongoose model
+          const pastBookingsList = response.data.pastBooking || [];
+          
+          const formattedPastBookings = pastBookingsList.map((item: { bookingId: string }) => ({
+            bookingId: item.bookingId,
+            parkingId: 'Check details', // Mongoose model doesn't store this, so we provide a fallback
+            userId: '',
+            bookingDate: '',
+            status: 'Completed'
+          }));
+          
+          setBookings(formattedPastBookings);
         }
-        setMessage('');
       }
     } catch (error) {
       setMessage('Error: ' + (error instanceof Error ? error.message : 'Unknown error'));
