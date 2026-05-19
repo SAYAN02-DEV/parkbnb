@@ -10,7 +10,10 @@ const OwnerDashboard = () => {
   const [selectedBookingId, setSelectedBookingId] = useState('');
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
+  const [stats, setStats] = useState({ totalStations: 0, totalSlots: 0, occupied: 0, available: 0 });
+  const [statsLoading, setStatsLoading] = useState(false);
   const fetchedRef = useRef(false);
+  const statsFetchedRef = useRef(false);
 
   const fetchBookings = useCallback(async () => {
     setLoading(true);
@@ -90,6 +93,50 @@ const OwnerDashboard = () => {
     }
   };
 
+  const fetchDashboardStats = useCallback(async () => {
+    setStatsLoading(true);
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        setMessage('Not authenticated. Please sign in first.');
+        setStats({ totalStations: 0, totalSlots: 0, occupied: 0, available: 0 });
+        return;
+      }
+
+      const response = await fetch('/api/v1/ownerdashboard', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'token': token
+        }
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        const totalSlots = Number(data.totalSlots || 0);
+        const available = Number(data.availableSlots || 0);
+        const occupied = Math.max(0, totalSlots - available);
+
+        setStats({
+          totalStations: 1,
+          totalSlots,
+          occupied,
+          available
+        });
+        setMessage('');
+      } else {
+        setMessage(data.message || 'Failed to fetch dashboard stats');
+        setStats({ totalStations: 0, totalSlots: 0, occupied: 0, available: 0 });
+      }
+    } catch (error) {
+      setMessage('Error: ' + (error instanceof Error ? error.message : 'Unknown error'));
+      setStats({ totalStations: 0, totalSlots: 0, occupied: 0, available: 0 });
+    } finally {
+      setStatsLoading(false);
+    }
+  }, []);
+
   // Fetch bookings when userleave section is activated
   useEffect(() => {
     if (activeSection === 'userleave' && !fetchedRef.current) {
@@ -99,6 +146,15 @@ const OwnerDashboard = () => {
       fetchedRef.current = false;
     }
   }, [activeSection, fetchBookings]);
+
+  useEffect(() => {
+    if (activeSection === 'overview' && !statsFetchedRef.current) {
+      statsFetchedRef.current = true;
+      fetchDashboardStats();
+    } else if (activeSection !== 'overview') {
+      statsFetchedRef.current = false;
+    }
+  }, [activeSection, fetchDashboardStats]);
   
   return (
     <div className="min-h-screen bg-[#131314] text-white">
@@ -242,19 +298,19 @@ const OwnerDashboard = () => {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-12">
           <div className="bg-[#1E1F20] border border-[#333537] rounded-2xl p-6">
             <p className="text-[#8E918F] text-sm mb-2">Total Stations</p>
-            <p className="text-3xl font-bold">0</p>
+            <p className="text-3xl font-bold">{statsLoading ? '—' : stats.totalStations}</p>
           </div>
           <div className="bg-[#1E1F20] border border-[#333537] rounded-2xl p-6">
             <p className="text-[#8E918F] text-sm mb-2">Total Slots</p>
-            <p className="text-3xl font-bold">0</p>
+            <p className="text-3xl font-bold">{statsLoading ? '—' : stats.totalSlots}</p>
           </div>
           <div className="bg-[#1E1F20] border border-[#333537] rounded-2xl p-6">
             <p className="text-[#8E918F] text-sm mb-2">Occupied</p>
-            <p className="text-3xl font-bold text-red-400">0</p>
+            <p className="text-3xl font-bold text-red-400">{statsLoading ? '—' : stats.occupied}</p>
           </div>
           <div className="bg-[#1E1F20] border border-[#333537] rounded-2xl p-6">
             <p className="text-[#8E918F] text-sm mb-2">Available</p>
-            <p className="text-3xl font-bold text-green-400">0</p>
+            <p className="text-3xl font-bold text-green-400">{statsLoading ? '—' : stats.available}</p>
           </div>
         </div>
 
